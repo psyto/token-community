@@ -23,4 +23,17 @@ contract TokenBank {
 
     /// @dev Tokan balances, which TokenBank reserves for each account address
     mapping(address => uint256) private _tokenBankBalances;
+
+    /// @dev Token transfer event
+    event TokenTransfer(
+        address indexed from,
+        address indexed to,
+        uint256 amount
+    );
+
+    /// @dev Token deposit event
+    event TokenDeposit(address indexed from, uint256 amount);
+
+    /// @dev Token withdraw event
+    event TokenWithdraw(address indexed from, uint256 amount);
 }
