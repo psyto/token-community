@@ -43,4 +43,24 @@ contract TokenBank {
         owner = msg.sender;
         _balances[owner] = _totalSupply;
     }
+
+    /// @dev return Token name
+    function name() public view returns (string memory) {
+        return _name;
+    }
+
+    /// @dev return Token symbol
+    function symbol() public view returns (string memory) {
+        return _symbol;
+    }
+
+    /// @dev return Token total supply
+    function totalSupply() public pure returns (uint256) {
+        return _totalSupply;
+    }
+
+    /// @dev return Token balance of specified account address
+    function balanceOf(address account) public view returns (uint256) {
+        return _balances[account];
+    }
 }
