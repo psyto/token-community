@@ -83,4 +83,9 @@ contract TokenBank {
         _balances[to] += amount;
         emit TokenTransfer(from, to, amount);
     }
+
+    /// @dev return TokenBank total deposit
+    function bankTotalDeposit() public view returns (uint256) {
+        return _bankTotalDeposit;
+    }
 }
