@@ -88,4 +88,9 @@ contract TokenBank {
     function bankTotalDeposit() public view returns (uint256) {
         return _bankTotalDeposit;
     }
+
+    /// @dev return the token amount, which TokenBank reserves for specified account address
+    function bankBalanceOf(address account) public view returns (uint256) {
+        return _tokenBankBalances[account];
+    }
 }
