@@ -93,4 +93,16 @@ contract TokenBank {
     function bankBalanceOf(address account) public view returns (uint256) {
         return _tokenBankBalances[account];
     }
+
+    /// @dev deposit token
+    function deposit(uint256 amount) public {
+        address from = msg.sender;
+        address to = owner;
+
+        _transfer(from, to, amount);
+
+        _tokenBankBalances[from] += amount;
+        _bankTotalDeposit += amount;
+        emit TokenDeposit(from, amount);
+    }
 }
