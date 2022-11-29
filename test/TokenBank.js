@@ -4,6 +4,13 @@ const { experimentalAddHardhatNetworkMessageTraceHook } = require("hardhat/confi
 const { isCallTrace } = require("hardhat/internal/hardhat-network/stack-traces/message-trace");
 
 describe("TokenBank contract", function() {
+    let MemberNFT;
+    let memberNFT;
+    const tokenURI1 = "hoge1";
+    const tokenURI2 = "hoge2";
+    const tokenURI3 = "hoge3";
+    const tokenURI4 = "hoge4";
+    const tokenURI5 = "hoge5";
     let TokenBank;
     let tokenBank;
     const name = "Token";
@@ -16,8 +23,16 @@ describe("TokenBank contract", function() {
 
     beforeEach(async function() {
         [owner, addr1, addr2, addr3] = await ethers.getSigners();
+        MemberNFT = await ethers.getContractFactory("MemberNFT");
+        memberNFT = await MemberNFT.deploy();
+        await memberNFT.deployed();
+        await memberNFT.nftMint(owner.address, tokenURI1);
+        await memberNFT.nftMint(addr1.address, tokenURI2);
+        await memberNFT.nftMint(addr1.address, tokenURI3);
+        await memberNFT.nftMint(addr2.address, tokenURI4);
+
         TokenBank = await ethers.getContractFactory("TokenBank");
-        tokenBank = await TokenBank.deploy(name, symbol);
+        tokenBank = await TokenBank.deploy(name, symbol, memberNFT.address);
         await tokenBank.deployed();        
     });
     describe("Deploy", function () {
@@ -108,6 +123,30 @@ describe("TokenBank contract", function() {
         it("withdraw should trigger TokenWithdraw event", async function () {
             await expect(tokenBank.connect(addr1).withdraw(100))
             .emit(tokenBank, "TokenWithdraw").withArgs(addr1.address, 100);
+        });
+        it("deposit by owner should be failed", async function () {
+            await expect(tokenBank.deposit(1))
+            .to.be.revertedWith("Owner cannot execute");
+        });
+        it("withdraw by owner should be failed", async function () {
+            await expect(tokenBank.withdraw(1))
+            .to.be.revertedWith("Owner cannot execute");
+        });
+        it("owner cannot transfer the amount greater than total deposit amount", async function () {
+            await expect(tokenBank.transfer(addr1.address, 201))
+            .to.be.revertedWith("Amount greater than the total supply cannot be transferred");
+        });
+        it("transfer by non NFT member should be failed", async function () {
+            await expect(tokenBank.connect(addr3).transfer(addr1.address, 100))
+            .to.be.revertedWith("not NFT member");
+        });
+        it("deposit by non NFT member should be failed", async function () {
+            await expect(tokenBank.connect(addr3).deposit(1))
+            .to.be.revertedWith("not NFT member");
+        });
+        it("withdraw by non NFT member should be failed", async function () {
+            await expect(tokenBank.connect(addr3).withdraw(1))
+            .to.be.revertedWith("not NFT member");
         });
     });
 })

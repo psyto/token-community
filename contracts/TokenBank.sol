@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.9;
 
-interface MemberNFT {
+interface MemberToken {
     function balanceOf(address owner) external view returns (uint256);
 }
 
 contract TokenBank {
-    MemberNFT public memberNFT;
+    MemberToken public memberToken;
 
     /// @dev Token name
     string private _name;
@@ -52,12 +52,12 @@ contract TokenBank {
         _symbol = symbol_;
         owner = msg.sender;
         _balances[owner] = _totalSupply;
-        memberNFT = MemberNFT(nftContract_);
+        memberToken = MemberToken(nftContract_);
     }
 
     /// @dev only NFT member
     modifier onlyMember() {
-        require(memberNFT.balanceOf(msg.sender) > 0, "not NFT member");
+        require(memberToken.balanceOf(msg.sender) > 0, "not NFT member");
         _;
     }
 
