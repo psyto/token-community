@@ -2,7 +2,13 @@
 
 pragma solidity ^0.8.9;
 
+interface MemberNFT {
+    function balanceOf(address owner) external view returns (uint256);
+}
+
 contract TokenBank {
+    MemberNFT public memberNFT;
+
     /// @dev Token name
     string private _name;
 
@@ -37,11 +43,16 @@ contract TokenBank {
     /// @dev Token withdraw event
     event TokenWithdraw(address indexed from, uint256 amount);
 
-    constructor(string memory name_, string memory symbol_) {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        address nftContract_
+    ) {
         _name = name_;
         _symbol = symbol_;
         owner = msg.sender;
         _balances[owner] = _totalSupply;
+        memberNFT = MemberNFT(nftContract_);
     }
 
     /// @dev return Token name
