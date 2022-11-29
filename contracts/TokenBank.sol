@@ -55,6 +55,18 @@ contract TokenBank {
         memberNFT = MemberNFT(nftContract_);
     }
 
+    /// @dev only NFT member
+    modifier onlyMember() {
+        require(memberNFT.balanceOf(msg.sender) > 0, "not NFT member");
+        _;
+    }
+
+    /// @dev other than owner
+    modifier notOwner() {
+        require(owner != msg.sender, "Owner cannot execute");
+        _;
+    }
+
     /// @dev return Token name
     function name() public view returns (string memory) {
         return _name;
@@ -76,7 +88,13 @@ contract TokenBank {
     }
 
     /// @dev transfer Token
-    function transfer(address to, uint256 amount) public {
+    function transfer(address to, uint256 amount) public onlyMember {
+        if (owner == msg.sender) {
+            require(
+                _balances[owner] - _bankTotalDeposit >= amount,
+                "Amount greater than the total supply cannot be transferred"
+            );
+        }
         address from = msg.sender;
         _transfer(from, to, amount);
     }
@@ -106,7 +124,7 @@ contract TokenBank {
     }
 
     /// @dev deposit token
-    function deposit(uint256 amount) public {
+    function deposit(uint256 amount) public onlyMember notOwner {
         address from = msg.sender;
         address to = owner;
 
@@ -118,7 +136,7 @@ contract TokenBank {
     }
 
     /// @dev withdraw token
-    function withdraw(uint256 amount) public {
+    function withdraw(uint256 amount) public onlyMember notOwner {
         address to = msg.sender;
         address from = owner;
         uint256 toTokenBankBalance = _tokenBankBalances[to];
