@@ -7,6 +7,27 @@ import MemberNFT from '../contracts/MemberNFT.json'
 import TokenBank from '../contracts/TokenBank.json'
 
 export default function Home() {
+  const [account, setAccount] = useState('')
+  const [chainId, setChainId] = useState(false)
+  const [tokenBalance, setTokenBalance] = useState('')
+  const [bankBalance, setBankBalance] = useState('')
+  const [bankTotalDeposit, setBankTotalDeposit] = useState('')
+  const [nftOwner, setNftOwner] = useState(false)
+  const [inputData, setInputData] = useState({ transferAddress: '', transferAmount: '', depositAmount: '', withdrawAmount: '' });
+  const [items, setItems] = useState([])
+  const goerliId = '0x5'
+  const zeroAddress = "0x0000000000000000000000000000000000000000";
+
+  const checkMetaMaskInstalled = async () => {
+    const { ethereum } = window;
+    if (!ethereum) {
+      alert('Please install MetaMask!');
+    }
+  }
+  useEffect(() => {
+    checkMetaMaskInstalled();
+  }, [])
+
   return (
     <div className={'flex flex-col items-center bg-slate-100 text-blue-900 min-h-screen'}>
       <Head>
