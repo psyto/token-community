@@ -48,9 +48,21 @@ export default function Home() {
       });
       console.log(`account: ${accounts[0]}`);
       setAccount(accounts[0]);
+      ethereum.on('accountsChanged', checkAccountChanged);
+      ethereum.on('chainChanged', checkChainId);
     } catch (err) {
       console.log(err);
     }
+  }
+
+  const checkAccountChanged = () => {
+    setAccount('');
+    setTokenBalance('');
+    setBankBalance('');
+    setBankTotalDeposit('');
+    setNftOwner(false);
+    setInputData({ transferAddress: '', transferAmount: '', depositAmount: '', withdrawAmount: '' });
+    setItems([]);
   }
 
   useEffect(() => {
