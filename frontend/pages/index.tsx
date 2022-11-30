@@ -19,13 +19,13 @@ export default function Home() {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   const checkMetaMaskInstalled = async () => {
-    const { ethereum } = window;
+    const { ethereum } = window as any;
     if (!ethereum) {
       alert('Please install MetaMask!');
     }
   }
   const checkChainId = async () => {
-    const { ethereum } = window;
+    const { ethereum } = window as any;
     if (ethereum) {
       const chain = await ethereum.request({method: 'eth_chainId'});
       console.log(`chain: ${chain}`);
@@ -42,12 +42,28 @@ export default function Home() {
 
   const connectWallet = async () => {
     try {
-      const { ethereum } = window;
+      const { ethereum } = window as any;
       const accounts = await ethereum.request({
         method: 'eth_requestAccounts'
       });
       console.log(`account: ${accounts[0]}`);
       setAccount(accounts[0]);
+
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      const tokenBankContract = new ethers.Contract(tokenBankAddress, TokenBank.abi, signer);
+      const tBalance = await tokenBankContract.balanceOf(accounts[0]);
+      console.log(`tBalance: ${tBalance}`);
+      setTokenBalance(tBalance.toNumber());
+
+      const bBalance = await tokenBankContract.bankBalanceOf(accounts[0]);
+      console.log(`bBalance: ${bBalance}`);
+      setBankBalance(bBalance.toNumber());
+
+      const totalDeposit = await tokenBankContract.bankTotalDeposit();
+      console.log(`totalDeposit: ${totalDeposit}`);
+      setBankTotalDeposit(totalDeposit.toNumber());
+
       ethereum.on('accountsChanged', checkAccountChanged);
       ethereum.on('chainChanged', checkChainId);
     } catch (err) {
