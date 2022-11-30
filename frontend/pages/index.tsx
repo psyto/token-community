@@ -24,8 +24,24 @@ export default function Home() {
       alert('Please install MetaMask!');
     }
   }
+  const checkChainId = async () => {
+    const { ethereum } = window;
+    if (ethereum) {
+      const chain = await ethereum.request({method: 'eth_chainId'});
+      console.log(`chain: ${chain}`);
+
+      if (chain != goerliId) {
+        alert('Please connect to Goerli!');
+        setChainId(false);
+        return
+      } else {
+        setChainId(true);
+      }
+    }
+  }
   useEffect(() => {
     checkMetaMaskInstalled();
+    checkChainId();
   }, [])
 
   return (
