@@ -102,6 +102,13 @@ export default function Home() {
     } else {''}
   }
 
+  const handler = (e: any) => {
+    setInputData(prevData => ({
+      ...prevData,
+      [e.target.name]: e.target.value
+    }));
+  }
+
   useEffect(() => {
     checkMetaMaskInstalled();
     checkChainId();
@@ -147,6 +154,31 @@ export default function Home() {
                 <span className="flex flex-col items-left font-semibold">Token balance: {tokenBalance}</span>
                 < span className="flex flex-col items-left font-semibold">Deposit amount: {bankBalance}</span>
               </div>
+              {nftOwner ? (
+              <>
+                <form className="flex pl-1 py-1 mb-1 bg-white border border-gray-400">
+                  <input
+                    type="text"
+                    className="w-5/12 ml-2 text-center border border-gray-400"
+                    name="transferAddress"
+                    placeholder="Wallet Address"
+                    onChange={handler}
+                    value={inputData.transferAddress}
+                  />
+                  <input
+                    type="text"
+                    className="w-5/12 ml-2 text-right border border-gray-400"
+                    name="transferAmount"
+                    placeholder={`100`}
+                    onChange={handler}
+                    value={inputData.transferAmount}
+                  />
+                  <button
+                    className="w-2/12 mx-2 bg-white border-blue-500 hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-2 border border-blue-500 hover:border-transparent rounded"
+                    onClick={''}
+                  >移転</button>
+                </form>
+              </>) : (<></>)}
             </div>
           ) : (
             <div className='flex flex-col justify-center items-center mb-20 font-bold text-2xl gap-y-3'>
