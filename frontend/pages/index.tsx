@@ -102,6 +102,32 @@ export default function Home() {
     } else {''}
   }
 
+  const tokenTransfer = async (event: any) => {
+    event.preventDefault();
+    if (tokenBalance >= inputData.transferAmount && zeroAddress != inputData.transferAddress) {
+      try {
+        const { ethereum } = window as any;
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const tokenBankContract = new ethers.Contract(tokenBankAddress, TokenBank.abi, signer);
+        const tx = await tokenBankContract.transfer(inputData.transferAddress, inputData.transferAmount);
+        await tx.wait();
+
+        const tBalance = await tokenBankContract.balanceOf(account);
+        setTokenBalance(tBalance.toNumber());
+        setInputData(prevData => ({
+          ...prevData,
+          transferAddress: '',
+          transferAmount: ''
+        }));
+      } catch (err) {
+console.log(err);
+}
+    } else {
+      alert("You cannot specify the amount greater than token balance and zero address!");
+    }
+  }
+  
   const handler = (e: any) => {
     setInputData(prevData => ({
       ...prevData,
@@ -175,7 +201,7 @@ export default function Home() {
                   />
                   <button
                     className="w-2/12 mx-2 bg-white border-blue-500 hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-2 border border-blue-500 hover:border-transparent rounded"
-                    onClick={''}
+                    onClick={tokenTransfer}
                   >移転</button>
                 </form>
               </>) : (<></>)}
