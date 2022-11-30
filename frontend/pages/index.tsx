@@ -17,25 +17,28 @@ export default function Home() {
   const [items, setItems] = useState([])
   const goerliId = '0x5'
   const zeroAddress = "0x0000000000000000000000000000000000000000";
-
+  
   const checkMetaMaskInstalled = async () => {
     const { ethereum } = window as any;
     if (!ethereum) {
       alert('Please install MetaMask!');
     }
   }
+
   const checkChainId = async () => {
     const { ethereum } = window as any;
     if (ethereum) {
-      const chain = await ethereum.request({method: 'eth_chainId'});
+      const chain = await ethereum.request({
+        method: 'eth_chainId'
+      });
       console.log(`chain: ${chain}`);
 
       if (chain != goerliId) {
-        alert('Please connect to Goerli!');
-        setChainId(false);
+        alert('Please connect to Goerli');
+        setChainId(false)
         return
       } else {
-        setChainId(true);
+        setChainId(true)
       }
     }
   }
@@ -46,8 +49,8 @@ export default function Home() {
       const accounts = await ethereum.request({
         method: 'eth_requestAccounts'
       });
-      console.log(`account: ${accounts[0]}`);
-      setAccount(accounts[0]);
+      console.log(`account: ${accounts[0]}`)
+      setAccount(accounts[0])
 
       const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
@@ -69,43 +72,56 @@ export default function Home() {
       ethereum.on('accountsChanged', checkAccountChanged);
       ethereum.on('chainChanged', checkChainId);
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
   }
 
   const checkAccountChanged = () => {
     setAccount('');
+    setNftOwner(false);
+    setItems([]);
     setTokenBalance('');
     setBankBalance('');
     setBankTotalDeposit('');
-    setNftOwner(false);
     setInputData({ transferAddress: '', transferAmount: '', depositAmount: '', withdrawAmount: '' });
-    setItems([]);
   }
 
   const checkNft = async (addr: any) => {
     const { ethereum } = window as any;
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
-
-    const nftContract = new ethers.Contract(
-      memberNFTAddress,
-      MemberNFT.abi,
-      signer
-    );
-
-    const balance = await nftContract.balanceOf(addr);
+    const memberNFTContract = new ethers.Contract(memberNFTAddress, MemberNFT.abi, signer);
+    const balance = await memberNFTContract.balanceOf(addr);
     console.log(`nftBalance: ${balance.toNumber()}`);
 
     if (balance.toNumber() > 0) {
       setNftOwner(true);
-    } else {''}
+      for (let i = 0; i < balance.toNumber(); i++) {
+        const tokenId = await memberNFTContract.tokenOfOwnerByIndex(addr, i);
+        let tokenURI = await memberNFTContract.tokenURI(tokenId);
+        tokenURI = tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
+        const meta = await axios.get(tokenURI);
+
+        const name = meta.data.name;
+        const description = meta.data.description;
+        const imageURI = meta.data.image.replace('ipfs://', 'https://ipfs.io/ipfs/');
+
+        const item = {
+          tokenId,
+          name,
+          description,
+          tokenURI,
+          imageURI
+        }
+        setItems(items => [...items, item]);
+      }
+    } else { '' }
   }
 
   const tokenTransfer = async (event: any) => {
     event.preventDefault();
     if (tokenBalance >= inputData.transferAmount && zeroAddress != inputData.transferAddress) {
-      try {
+      try{
         const { ethereum } = window as any;
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
@@ -121,17 +137,17 @@ export default function Home() {
           transferAmount: ''
         }));
       } catch (err) {
-console.log(err);
-}
+        console.log(err);
+      }
     } else {
-      alert("You cannot specify the amount greater than token balance and zero address!");
+      alert("You cannot specify amount greater than token balance and zero address.")
     }
   }
-
+  
   const tokenDeposit = async (event: any) => {
     event.preventDefault();
     if (tokenBalance >= inputData.depositAmount) {
-      try {
+      try{
         const { ethereum } = window as any;
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
@@ -145,23 +161,23 @@ console.log(err);
         setTokenBalance(tBalance.toNumber());
         setBankBalance(bBalance.toNumber());
         setBankTotalDeposit(totalDeposit.toNumber());
-
+          
         setInputData(prevData => ({
           ...prevData,
           depositAmount: ''
         }));
       } catch (err) {
-console.log(err);
-}
+        console.log(err);
+      }
     } else {
-      alert("You cannot specify the amount greater than token balance!");
+      alert("You cannot deposit amount greater than token balance.")
     }
   }
 
   const tokenWithdraw = async (event: any) => {
     event.preventDefault();
     if (bankBalance >= inputData.withdrawAmount) {
-      try {
+      try{
         const { ethereum } = window as any;
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
@@ -175,19 +191,18 @@ console.log(err);
         setTokenBalance(tBalance.toNumber());
         setBankBalance(bBalance.toNumber());
         setBankTotalDeposit(totalDeposit.toNumber());
-
         setInputData(prevData => ({
           ...prevData,
           withdrawAmount: ''
         }));
       } catch (err) {
-console.log(err);
-}
+        console.log(err);
+      }
     } else {
-      alert("You cannot withdraw the amount greater than deposit balance!");
+      alert("You cannot withdraw amount greater than deposit balance.")
     }
   }
-  
+
   const handler = (e: any) => {
     setInputData(prevData => ({
       ...prevData,
@@ -196,8 +211,8 @@ console.log(err);
   }
 
   useEffect(() => {
-    checkMetaMaskInstalled();
-    checkChainId();
+    checkMetaMaskInstalled()
+    checkChainId()
   }, [])
 
   return (
@@ -207,7 +222,7 @@ console.log(err);
         <meta name="description" content="Generated by create next app" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <h2 className='{text-6xl font-bold my-12 mt-8}'>
+      <h2 className={'text-6xl font-bold my-12 mt-8'}>
         Welcome to Token Community!
       </h2>
       <div className='mt-8 mb-16 hover:rotate-180 hover:scale-105 transition duration-700 ease-in-out'>
@@ -226,19 +241,19 @@ console.log(err);
       <div className={'flex mt-1'}>
         {account === '' ? (
           <button className={'bg-transparent text-blue-700 font-semibold py-2 px-4 border border-blue-500 rounded hover:border-transparent hover:text-white hover:bg-blue-500 hover:cursor-pointer'}
-            onClick={connectWallet}>
+          onClick={connectWallet}>
             Connect to MetaMask
-          </button>
+          </button>          
         ) : (
           chainId ? (
             <div >
               <div className='px-2 py-2 bg-transparent'>
-                <span className="flex flex-col items-left font-semibold">Total deposit: {bankTotalDeposit}</span>
+                <span className="flex flex-col items-left font-semibold">Total deposit balance: {bankTotalDeposit}</span>
               </div>
               <div className='px-2 py-2 mb-2 bg-white border border-gray-400'>
                 <span className="flex flex-col items-left font-semibold">Address: {account}</span>
                 <span className="flex flex-col items-left font-semibold">Token balance: {tokenBalance}</span>
-                < span className="flex flex-col items-left font-semibold">Deposit amount: {bankBalance}</span>
+                < span className="flex flex-col items-left font-semibold">Deposit balance: {bankBalance}</span>
               </div>
               {nftOwner ? (
               <>
@@ -292,12 +307,28 @@ console.log(err);
                     onClick={tokenWithdraw}
                   >Withdraw</button>
                 </form>
+                {
+                  items.map((item, i) => (
+                    <div key={i} className="flex justify-center pl-1 py-2 mb-1">
+                      <div className="flex flex-col md:flex-row md:max-w-xl rounded-lg bg-white shadow-lg">
+                        <img className=" w-full h-96 md:h-auto object-cover md:w-48 rounded-t-lg md:rounded-none md:rounded-l-lg" src={item['imageURI']} alt="" />
+                        <div className="p-6 flex flex-col justify-start">
+                          <h5 className="text-gray-900 text-xl font-medium mb-2">{item['name']}</h5>
+                          <p className="text-gray-700 text-base mb-4">
+                            {item['description']}
+                          </p>
+                          <p className="text-gray-600 text-xs">Own NFT# {item.tokenId.toNumber()}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                }                            
               </>) : (<></>)}
             </div>
           ) : (
             <div className='flex flex-col justify-center items-center mb-20 font-bold text-2xl gap-y-3'>
-              <div>Goerliに接続してください</div>
-            </div>)
+              <div>Please connect to Goerli</div>
+            </div>)          
         )}
       </div>
     </div>
